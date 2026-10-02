@@ -13,9 +13,15 @@ import {
   decodeCardFromUrl,
   SAMPLE_PRESET_CARDS,
   saveCardToHistory,
-  getSavedCardHistory
+  getSavedCardHistory,
 } from './utils/cardShare';
-import { Sparkles, PlusCircle, History, Gift, Heart, Eye, ArrowLeft } from 'lucide-react';
+import {
+  saveCardToFirestore,
+  getCardFromFirestore,
+  subscribeToCard,
+  listRecentCardsFromFirestore,
+} from './services/cardFirestore';
+import { Sparkles, PlusCircle, History, Gift, Heart, Eye, ArrowLeft, CloudCheck, RefreshCw } from 'lucide-react';
 
 export default function App() {
   const [currentCard, setCurrentCard] = useState<CardData>(SAMPLE_PRESET_CARDS.arcade);
@@ -24,14 +30,39 @@ export default function App() {
   const [shareUrl, setShareUrl] = useState('');
   const [historyCards, setHistoryCards] = useState<CardData[]>([]);
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingCard, setIsLoadingCard] = useState(false);
+  const [isLiveSynced, setIsLiveSynced] = useState(false);
 
   // Check URL query string on load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const cardParam = params.get('card');
+    const firestoreCardId = params.get('id');
+    const legacyCardParam = params.get('card');
 
-    if (cardParam) {
-      const decoded = decodeCardFromUrl(cardParam);
+    if (firestoreCardId) {
+      setIsLoadingCard(true);
+      // Fetch initial and subscribe for real-time live updates!
+      const unsubscribe = subscribeToCard(
+        firestoreCardId,
+        (liveCard) => {
+          setCurrentCard(liveCard);
+          setViewMode('presentation');
+          setIsLiveSynced(true);
+          setIsLoadingCard(false);
+          saveCardToHistory(liveCard);
+        },
+        (err) => {
+          console.error('Could not load card from Firestore:', err);
+          setIsLoadingCard(false);
+        }
+      );
+
+      return () => {
+        unsubscribe();
+      };
+    } else if (legacyCardParam) {
+      const decoded = decodeCardFromUrl(legacyCardParam);
       if (decoded) {
         setCurrentCard(decoded);
         setViewMode('presentation');
@@ -40,18 +71,46 @@ export default function App() {
     }
 
     setHistoryCards(getSavedCardHistory());
+
+    // Also populate recent cards from Firestore
+    listRecentCardsFromFirestore()
+      .then((remoteCards) => {
+        if (remoteCards.length > 0) {
+          setHistoryCards((local) => {
+            const combined = [...remoteCards, ...local];
+            const unique = Array.from(new Map(combined.map((c) => [c.id, c])).values());
+            return unique;
+          });
+        }
+      })
+      .catch((err) => console.log('Could not load recent Firestore cards:', err));
   }, []);
 
-  const handleSaveAndShare = (card: CardData) => {
-    const encoded = encodeCardToUrl(card);
-    const origin = window.location.origin + window.location.pathname;
-    const fullUrl = `${origin}?card=${encoded}`;
+  const handleSaveAndShare = async (card: CardData) => {
+    setIsSaving(true);
+    try {
+      // 1. Save card to Firebase Firestore cloud database!
+      const cardId = await saveCardToFirestore(card);
+      const origin = window.location.origin + window.location.pathname;
+      const cleanLiveUrl = `${origin}?id=${cardId}`;
 
-    setCurrentCard(card);
-    setShareUrl(fullUrl);
-    saveCardToHistory(card);
-    setHistoryCards(getSavedCardHistory());
-    setIsShareModalOpen(true);
+      const savedCard = { ...card, id: cardId };
+      setCurrentCard(savedCard);
+      setShareUrl(cleanLiveUrl);
+      saveCardToHistory(savedCard);
+      setHistoryCards(getSavedCardHistory());
+      setIsLiveSynced(true);
+      setIsShareModalOpen(true);
+    } catch (error) {
+      console.error('Firestore save error, falling back to URL encoding:', error);
+      // Fallback
+      const encoded = encodeCardToUrl(card);
+      const origin = window.location.origin + window.location.pathname;
+      setShareUrl(`${origin}?card=${encoded}`);
+      setIsShareModalOpen(true);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handlePreviewLive = (card: CardData) => {
@@ -67,6 +126,7 @@ export default function App() {
       createdAt: Date.now(),
     };
     setCurrentCard(newCard);
+    setIsLiveSynced(false);
   };
 
   const handleCreateNew = () => {
@@ -94,6 +154,7 @@ export default function App() {
     };
     setCurrentCard(blankCard);
     setViewMode('builder');
+    setIsLiveSynced(false);
     // Clear URL query
     window.history.pushState({}, '', window.location.pathname);
   };
@@ -127,6 +188,13 @@ export default function App() {
             </span>
             <span>CelebrationCraft</span>
           </a>
+
+          {isLiveSynced && (
+            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/30">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live Firestore Synced</span>
+            </span>
+          )}
         </div>
 
         {/* Action Controls */}
@@ -168,7 +236,7 @@ export default function App() {
           <div className="mx-auto max-w-xl">
             <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1">
               <History className="h-3.5 w-3.5 text-amber-400" />
-              <span>Recently Saved & Viewed Cards</span>
+              <span>Saved Firestore Cloud & Local Cards</span>
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
               {historyCards.map((c) => (
@@ -199,21 +267,27 @@ export default function App() {
 
       {/* Main Container Area */}
       <main className="flex-1">
-        {viewMode === 'builder' ? (
+        {isLoadingCard ? (
+          <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-3">
+            <RefreshCw className="h-8 w-8 text-pink-500 animate-spin" />
+            <p className="text-xs font-bold text-slate-400">Loading Live Card from Firebase...</p>
+          </div>
+        ) : viewMode === 'builder' ? (
           <CardBuilder
             initialCard={currentCard}
             onSaveAndShare={handleSaveAndShare}
             onPreviewLive={handlePreviewLive}
             onLoadPreset={handleLoadPreset}
+            isSaving={isSaving}
           />
         ) : (
           <CardPresentation
             card={currentCard}
             onEditOrCreateOwn={() => setViewMode('builder')}
             onOpenShareModal={() => {
-              const encoded = encodeCardToUrl(currentCard);
               const origin = window.location.origin + window.location.pathname;
-              setShareUrl(`${origin}?card=${encoded}`);
+              const link = currentCard.id ? `${origin}?id=${currentCard.id}` : `${origin}?card=${encodeCardToUrl(currentCard)}`;
+              setShareUrl(link);
               setIsShareModalOpen(true);
             }}
           />
@@ -222,7 +296,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950 p-4 text-center text-xs text-slate-500">
-        <p>CelebrationCraft · Interactive Birthday Card Studio & Generator</p>
+        <p>CelebrationCraft · Interactive Birthday Card Studio & Generator · Firebase Firestore Connected</p>
       </footer>
 
       {/* Export & Share Modal */}

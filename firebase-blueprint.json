@@ -1,0 +1,79 @@
+{
+  "entities": {
+    "Card": {
+      "title": "Card",
+      "description": "An interactive digital birthday card",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the card"
+        },
+        "recipientName": {
+          "type": "string",
+          "description": "Name of the birthday celebrant"
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Name of the sender(s)"
+        },
+        "headline": {
+          "type": "string",
+          "description": "Main headline or title of the card"
+        },
+        "message": {
+          "type": "string",
+          "description": "Heartfelt birthday message text"
+        },
+        "theme": {
+          "type": "string",
+          "description": "Theme visual styling id"
+        },
+        "musicTrack": {
+          "type": "string",
+          "description": "Background music audio synthesizer track id"
+        },
+        "candleCount": {
+          "type": "number",
+          "description": "Number of cake candles to blow"
+        },
+        "enableMicBlow": {
+          "type": "boolean",
+          "description": "Whether microphone blowing is enabled"
+        },
+        "giftBoxMessage": {
+          "type": "string",
+          "description": "Surprise text revealed inside the gift box"
+        },
+        "scratchCardSecret": {
+          "type": "string",
+          "description": "Secret voucher text revealed by scratching"
+        },
+        "questTitle": {
+          "type": "string",
+          "description": "Optional sub-title or quest title"
+        },
+        "specialQuote": {
+          "type": "string",
+          "description": "Optional special quote"
+        },
+        "customBadge": {
+          "type": "string",
+          "description": "Optional custom badge or honorific title"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the card was created"
+        }
+      },
+      "required": ["recipientName", "senderName", "headline", "message", "theme"]
+    }
+  },
+  "firestore": {
+    "/cards/{cardId}": {
+      "schema": "Card",
+      "description": "Collection of saved interactive birthday cards accessible via live ID"
+    }
+  }
+}

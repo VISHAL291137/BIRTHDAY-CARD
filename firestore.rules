@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidCard(data) {
+      return data.keys().hasAll(['recipientName', 'senderName', 'headline', 'message', 'theme', 'createdAt'])
+        && data.recipientName is string && data.recipientName.size() > 0 && data.recipientName.size() <= 100
+        && data.senderName is string && data.senderName.size() > 0 && data.senderName.size() <= 100
+        && data.headline is string && data.headline.size() > 0 && data.headline.size() <= 200
+        && data.message is string && data.message.size() > 0 && data.message.size() <= 5000
+        && data.theme is string && data.theme.size() <= 50
+        && (!('candleCount' in data) || (data.candleCount is number && data.candleCount >= 1 && data.candleCount <= 10))
+        && (!('enableMicBlow' in data) || data.enableMicBlow is bool)
+        && (!('giftBoxMessage' in data) || (data.giftBoxMessage is string && data.giftBoxMessage.size() <= 500))
+        && (!('scratchCardSecret' in data) || (data.scratchCardSecret is string && data.scratchCardSecret.size() <= 500))
+        && (!('questTitle' in data) || (data.questTitle is string && data.questTitle.size() <= 200))
+        && (!('specialQuote' in data) || (data.specialQuote is string && data.specialQuote.size() <= 500))
+        && (!('customBadge' in data) || (data.customBadge is string && data.customBadge.size() <= 100))
+        && (!('balloonMessages' in data) || (data.balloonMessages is list && data.balloonMessages.size() <= 20))
+        && (!('memories' in data) || (data.memories is list && data.memories.size() <= 30))
+        && (!('photos' in data) || (data.photos is list && data.photos.size() <= 10));
+    }
+
+    match /cards/{cardId} {
+      // Allow reading individual card by ID
+      allow get: if isValidId(cardId);
+      // Allow listing cards publicly
+      allow list: if true;
+      // Allow creating or updating a valid card
+      allow create, update: if isValidId(cardId) && isValidCard(request.resource.data);
+      allow delete: if false;
+    }
+  }
+}

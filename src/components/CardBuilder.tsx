@@ -20,6 +20,7 @@ interface CardBuilderProps {
   onSaveAndShare: (card: CardData) => void;
   onPreviewLive: (card: CardData) => void;
   onLoadPreset: (theme: ThemeId) => void;
+  isSaving?: boolean;
 }
 
 export const CardBuilder: React.FC<CardBuilderProps> = ({
@@ -27,6 +28,7 @@ export const CardBuilder: React.FC<CardBuilderProps> = ({
   onSaveAndShare,
   onPreviewLive,
   onLoadPreset,
+  isSaving = false,
 }) => {
   const [card, setCard] = useState<CardData>(initialCard);
   const [activeTab, setActiveTab] = useState<'details' | 'theme' | 'content' | 'treats'>('details');
@@ -504,11 +506,17 @@ export const CardBuilder: React.FC<CardBuilderProps> = ({
 
         <button
           onClick={() => onSaveAndShare(card)}
-          className="w-full sm:flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 py-3.5 font-extrabold text-xs text-white shadow-xl hover:opacity-95 transition-opacity"
+          disabled={isSaving}
+          className="w-full sm:flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 py-3.5 font-extrabold text-xs text-white shadow-xl hover:opacity-95 transition-opacity disabled:opacity-50"
         >
           <Share2 className="h-4 w-4" />
-          <span>Generate Share Link & QR</span>
+          <span>{isSaving ? 'Saving to Firestore...' : 'Save to Firestore & Share Link'}</span>
         </button>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
+        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span>Connected to Live Firebase Firestore Cloud Database</span>
       </div>
     </div>
   );
