@@ -3,10 +3,15 @@ import { ThemeId } from '../types/card';
 
 interface ThemeWrapperProps {
   theme: ThemeId;
+  romanticMood?: 'velvet' | 'sunset' | 'lavender' | 'midnight';
   children: React.ReactNode;
 }
 
-export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ theme, children }) => {
+export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({
+  theme,
+  romanticMood = 'velvet',
+  children,
+}) => {
   switch (theme) {
     case 'arcade':
       return (
@@ -23,16 +28,69 @@ export const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ theme, children }) =
         </div>
       );
 
-    case 'romantic':
+    case 'romantic': {
+      const getMoodStyles = () => {
+        switch (romanticMood) {
+          case 'sunset':
+            return {
+              bg: 'bg-gradient-to-br from-[#420f28] via-[#5c1638] via-[#48112e] to-[#24061a]',
+              orb1: 'bg-pink-500/25',
+              orb2: 'bg-amber-500/20',
+              border: 'border-pink-300/40',
+              cardBg: 'bg-rose-950/50',
+            };
+          case 'lavender':
+            return {
+              bg: 'bg-gradient-to-br from-[#280838] via-[#3d0e52] via-[#2f0b42] to-[#140221]',
+              orb1: 'bg-purple-500/25',
+              orb2: 'bg-fuchsia-500/20',
+              border: 'border-purple-300/40',
+              cardBg: 'bg-purple-950/50',
+            };
+          case 'midnight':
+            return {
+              bg: 'bg-gradient-to-br from-[#200311] via-[#380820] via-[#260515] to-[#0e0108]',
+              orb1: 'bg-red-600/20',
+              orb2: 'bg-rose-700/20',
+              border: 'border-red-400/30',
+              cardBg: 'bg-black/60',
+            };
+          default:
+            return {
+              bg: 'bg-gradient-to-br from-[#3b041a] via-[#4d0c26] via-[#3d081f] to-[#1c020d]',
+              orb1: 'bg-rose-600/20',
+              orb2: 'bg-pink-500/20',
+              border: 'border-rose-300/30',
+              cardBg: 'bg-rose-950/50',
+            };
+        }
+      };
+
+      const moodStyle = getMoodStyles();
+
       return (
-        <div className="min-h-screen bg-gradient-to-b from-rose-950 via-slate-950 to-pink-950 text-rose-100 font-['Playfair_Display'] relative overflow-x-hidden selection:bg-rose-500 selection:text-white">
+        <div
+          className={`min-h-screen ${moodStyle.bg} animate-romantic-gradient text-rose-100 font-['Playfair_Display'] relative overflow-x-hidden selection:bg-rose-500 selection:text-white transition-colors duration-700`}
+        >
+          {/* Ambient Romantic Floating Glowing Orbs */}
+          <div
+            className={`pointer-events-none fixed top-10 left-1/4 h-80 w-80 rounded-full ${moodStyle.orb1} blur-[100px] animate-pulse-glow transition-all duration-700`}
+          />
+          <div
+            className={`pointer-events-none fixed bottom-20 right-1/4 h-96 w-96 rounded-full ${moodStyle.orb2} blur-[120px] animate-pulse-glow transition-all duration-700`}
+            style={{ animationDelay: '2.5s' }}
+          />
+
           <div className="relative mx-auto max-w-2xl px-4 py-8">
-            <div className="rounded-3xl border border-rose-300/20 bg-rose-950/40 p-6 backdrop-blur-xl shadow-2xl ring-1 ring-rose-500/10 sm:p-8">
+            <div
+              className={`rounded-3xl border ${moodStyle.border} ${moodStyle.cardBg} p-6 backdrop-blur-2xl shadow-[0_10px_50px_rgba(244,63,94,0.18)] ring-1 ring-rose-500/20 sm:p-8 transition-all duration-500`}
+            >
               {children}
             </div>
           </div>
         </div>
       );
+    }
 
     case 'cyberpunk':
       return (
