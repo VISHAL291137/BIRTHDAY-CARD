@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+:root {
+  --bg-creamy-blush: #fff9f9;
+  --rose-soft: #f3a2b5;
+  --rose-deep: #e9829b;
+}
+
+body {
+  background-color: #fff9f9;
+  color: #1e293b;
+}
+
+::selection {
+  background-color: #e9829b;
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff9f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f3a2b5;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e9829b;
+}
+
 @keyframes romanticGradient {
   0% {
     background-position: 0% 50%;
@@ -44,11 +78,11 @@
 @keyframes cardStepIn {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.98);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -72,5 +106,115 @@
 }
 
 .animate-card-step {
-  animation: cardStepIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: cardStepIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* Floral Background Elements Animations for Romantic & Arcade Themes */
+@keyframes floralSway {
+  0%, 100% {
+    transform: rotate(-5deg) translateY(0px);
+  }
+  50% {
+    transform: rotate(5deg) translateY(-8px);
+  }
+}
+
+@keyframes floralSwayAlt {
+  0%, 100% {
+    transform: rotate(4deg) translateY(-6px);
+  }
+  50% {
+    transform: rotate(-4deg) translateY(2px);
+  }
+}
+
+@keyframes floralPulse {
+  0%, 100% {
+    transform: scale(0.95) rotate(0deg);
+    opacity: 0.7;
+    filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.25));
+  }
+  50% {
+    transform: scale(1.06) rotate(3deg);
+    opacity: 0.95;
+    filter: drop-shadow(0 0 16px rgba(244, 63, 94, 0.5));
+  }
+}
+
+@keyframes romanticFloralSway {
+  0%, 100% {
+    transform: rotate(-6deg) scale(0.98) translateY(0px);
+    filter: drop-shadow(0 4px 12px rgba(225, 29, 72, 0.25));
+  }
+  50% {
+    transform: rotate(6deg) scale(1.04) translateY(-10px);
+    filter: drop-shadow(0 10px 24px rgba(244, 63, 94, 0.45));
+  }
+}
+
+@keyframes romanticFloralBloom {
+  0%, 100% {
+    transform: scale(0.94) rotate(0deg);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.08) rotate(5deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(251, 113, 133, 0.45));
+  }
+}
+
+@keyframes arcadeFloralPulse {
+  0%, 100% {
+    transform: scale(1) rotate(-3deg);
+    filter: drop-shadow(0 0 6px #00ffcc) drop-shadow(0 0 12px #ff007f);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1) rotate(3deg);
+    filter: drop-shadow(0 0 14px #ffff00) drop-shadow(0 0 20px #ff007f);
+    opacity: 1;
+  }
+}
+
+@keyframes arcadeFloralSway {
+  0%, 100% {
+    transform: rotate(-8deg) translateY(0);
+  }
+  50% {
+    transform: rotate(8deg) translateY(-6px);
+  }
+}
+
+.animate-floral-sway {
+  transform-origin: bottom center;
+  animation: floralSway 6.5s ease-in-out infinite;
+}
+
+.animate-floral-sway-alt {
+  transform-origin: bottom center;
+  animation: floralSwayAlt 7.5s ease-in-out infinite;
+}
+
+.animate-floral-pulse {
+  animation: floralPulse 5s ease-in-out infinite;
+}
+
+.animate-romantic-floral-sway {
+  transform-origin: center bottom;
+  animation: romanticFloralSway 7s ease-in-out infinite;
+}
+
+.animate-romantic-floral-bloom {
+  animation: romanticFloralBloom 6s ease-in-out infinite;
+}
+
+.animate-arcade-floral-pulse {
+  animation: arcadeFloralPulse 3.5s ease-in-out infinite;
+}
+
+.animate-arcade-floral-sway {
+  transform-origin: bottom center;
+  animation: arcadeFloralSway 4s ease-in-out infinite;
+}
+

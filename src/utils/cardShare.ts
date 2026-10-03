@@ -30,6 +30,73 @@ export function decodeCardFromUrl(encoded: string): CardData | null {
 }
 
 /**
+ * Dedicated "For Her" (Queen / Romantic / Sweet) Card Template
+ */
+export const FOR_HER_CARD: CardData = {
+  id: `card-for-her-${Date.now()}`,
+  recipientName: 'Sarah',
+  senderName: 'Leo',
+  age: 24,
+  eventDate: new Date().toISOString().split('T')[0],
+  headline: 'Happy Birthday to My Favorite Star ✨',
+  message:
+    'To the most radiant and wonderful person who brings warmth to every quiet room and magic to every ordinary day. Wishing you a birthday as soft, brilliant, and breathtaking as you are! May your new year be showered with endless sweet laughter, gentle adventures, and all the love your heart can hold.',
+  theme: 'romantic',
+  musicTrack: 'romantic',
+  candleCount: 3,
+  enableMicBlow: true,
+  photos: [],
+  memories: [
+    'Our cozy rainy afternoon coffee date',
+    'Laughing together until our stomachs hurt',
+    'Every little spontaneous walk and road trip',
+  ],
+  giftBoxMessage: '🌹 Inside this box: A pampering spa day & romantic dinner on me!',
+  scratchCardSecret: '💖 1x Unlimited Warm Hugs, Sweet Treats & Breakfast in Bed!',
+  balloonMessages: [
+    '🌸 You make life so much sweeter!',
+    '✨ Gorgeous, brilliant & loved!',
+    '👑 Long live the Birthday Queen!',
+    '🎂 Pure joy and happiness always!',
+  ],
+  customBadge: 'BIRTHDAY QUEEN 👑',
+  questTitle: '🌸 The Birthday Queen Quest',
+  specialQuote: 'In all the world, there is no heart for me like yours.',
+  createdAt: Date.now(),
+};
+
+/**
+ * Clean Blank Card Template
+ */
+export const BLANK_CARD: CardData = {
+  id: `card-blank-${Date.now()}`,
+  recipientName: '',
+  senderName: '',
+  age: undefined,
+  eventDate: '',
+  headline: '',
+  message: '',
+  theme: 'arcade',
+  musicTrack: 'arcade',
+  candleCount: 5,
+  enableMicBlow: true,
+  photos: [],
+  memories: [],
+  giftBoxMessage: '',
+  scratchCardSecret: '',
+  balloonMessages: [
+    '🎉 Wishing you infinite joy!',
+    '🎂 May all your dreams come true!',
+    '⭐ Level Up +1 Year!',
+    '🍕 Unlimited Happiness!'
+  ],
+  customBadge: '',
+  questTitle: '',
+  specialQuote: '',
+  createdAt: Date.now(),
+};
+
+/**
  * Sample Preset Cards for quick demonstration
  */
 export const SAMPLE_PRESET_CARDS: Record<ThemeId, CardData> = {

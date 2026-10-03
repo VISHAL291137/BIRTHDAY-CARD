@@ -33,7 +33,7 @@ export const ConfettiCanvas: React.FC<ConfettiCanvasProps> = ({ theme, triggerCo
       case 'arcade':
         return ['#ff0055', '#00ffcc', '#ffff00', '#ff00ff', '#00ff00', '#ffffff', '#ff9900'];
       case 'romantic':
-        return ['#f472b6', '#fb7185', '#fda4af', '#f43f5e', '#fff1f2', '#fbcfe8', '#e11d48'];
+        return ['#dc2626', '#b91c1c', '#991b1b', '#be123c', '#881337', '#e11d48', '#f43f5e', '#fda4af', '#fff1f2'];
       case 'cyberpunk':
         return ['#00f0ff', '#ff007f', '#7000ff', '#39ff14', '#00ffff', '#ffe600'];
       case 'galaxy':

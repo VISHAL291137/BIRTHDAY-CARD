@@ -5,6 +5,7 @@ import { ThemeId } from '../types/card';
 interface BalloonPopProps {
   messages?: string[];
   theme?: ThemeId;
+  onBalloonTap?: (index: number) => void;
 }
 
 const DEFAULT_BALLOON_MESSAGES = [
@@ -17,6 +18,7 @@ const DEFAULT_BALLOON_MESSAGES = [
 export const BalloonPop: React.FC<BalloonPopProps> = ({
   messages = DEFAULT_BALLOON_MESSAGES,
   theme = 'arcade',
+  onBalloonTap,
 }) => {
   const activeMessages = messages.length > 0 ? messages : DEFAULT_BALLOON_MESSAGES;
 
@@ -32,6 +34,10 @@ export const BalloonPop: React.FC<BalloonPopProps> = ({
   ];
 
   const handlePop = (index: number) => {
+    // Subtle acoustic balloon tap SFX
+    soundEngine.playBalloonTapSound();
+    onBalloonTap?.(index);
+
     if (poppedIndex[index]) return;
     soundEngine.playPopSound();
 

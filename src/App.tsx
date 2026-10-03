@@ -12,6 +12,8 @@ import {
   encodeCardToUrl,
   decodeCardFromUrl,
   SAMPLE_PRESET_CARDS,
+  BLANK_CARD,
+  FOR_HER_CARD,
   saveCardToHistory,
   getSavedCardHistory,
 } from './utils/cardShare';
@@ -21,15 +23,14 @@ import {
   subscribeToCard,
   listRecentCardsFromFirestore,
 } from './services/cardFirestore';
-import { Sparkles, PlusCircle, History, Gift, Heart, Eye, ArrowLeft, CloudCheck, RefreshCw } from 'lucide-react';
+import { Sparkles, PlusCircle, History, Gift, Heart, Eye, ArrowLeft, CloudCheck, RefreshCw, Share2, Trash2 } from 'lucide-react';
 
 export default function App() {
-  const [currentCard, setCurrentCard] = useState<CardData>(SAMPLE_PRESET_CARDS.arcade);
+  const [currentCard, setCurrentCard] = useState<CardData>(FOR_HER_CARD);
   const [viewMode, setViewMode] = useState<'builder' | 'presentation'>('builder');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [historyCards, setHistoryCards] = useState<CardData[]>([]);
-  const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingCard, setIsLoadingCard] = useState(false);
   const [isLiveSynced, setIsLiveSynced] = useState(false);
@@ -130,29 +131,11 @@ export default function App() {
   };
 
   const handleCreateNew = () => {
-    const blankCard: CardData = {
+    setCurrentCard({
+      ...BLANK_CARD,
       id: `card-${Date.now()}`,
-      recipientName: '',
-      senderName: '',
-      headline: 'Happy Birthday! 🎉',
-      message: 'Wishing you a day filled with joy, laughter, and sweet surprises!',
-      theme: 'arcade',
-      musicTrack: 'arcade',
-      candleCount: 5,
-      enableMicBlow: true,
-      photos: [],
-      memories: [],
-      giftBoxMessage: '🎁 SPECIAL SURPRISE: A day of celebration and your favorite treat on me!',
-      scratchCardSecret: '🎟️ SECRET VOUCHER: 1x Homemade Dinner + Unlimited Desserts!',
-      balloonMessages: [
-        '🎉 Wishing you infinite joy!',
-        '🎂 May all your dreams come true!',
-        '⭐ Level Up +1 Year!',
-        '🍕 Unlimited Pizza Luck!'
-      ],
       createdAt: Date.now(),
-    };
-    setCurrentCard(blankCard);
+    });
     setViewMode('builder');
     setIsLiveSynced(false);
     // Clear URL query
@@ -160,18 +143,21 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased selection:bg-pink-500 selection:text-white">
+    <div
+      className="h-screen h-[100dvh] max-h-screen max-h-[100dvh] bg-[#fff9f9] text-slate-800 flex flex-col antialiased selection:bg-[#e9829b] selection:text-white overflow-hidden"
+      style={{ backgroundColor: '#fff9f9' }}
+    >
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-4 py-3 backdrop-blur-md">
+      <header className="flex-shrink-0 z-40 flex items-center justify-between border-b border-[#f3a2b5]/40 bg-[#fff9f9]/95 px-3 sm:px-4 py-2 sm:py-2.5 backdrop-blur-md shadow-2xs">
         {/* Brand Zone */}
         <div className="flex items-center gap-2">
           {viewMode === 'presentation' && (
             <button
               onClick={() => setViewMode('builder')}
-              className="mr-1 rounded-xl bg-slate-900 border border-slate-800 p-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className="mr-1 rounded-xl bg-white border border-[#f3a2b5]/50 p-1.5 sm:p-2 text-slate-700 hover:text-slate-900 hover:bg-[#fff9f9] transition-colors shadow-2xs"
               title="Back to Card Editor"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
           )}
 
@@ -181,96 +167,63 @@ export default function App() {
               e.preventDefault();
               handleCreateNew();
             }}
-            className="text-base font-extrabold tracking-tight text-white flex items-center gap-2"
+            className="text-sm sm:text-base font-black tracking-tight text-slate-900 flex items-center gap-1.5 sm:gap-2"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-pink-500 to-amber-400 text-white shadow-md">
+            <span className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-[#e9829b] to-[#f3a2b5] text-white shadow-md text-sm sm:text-base">
               🎂
             </span>
             <span>CelebrationCraft</span>
           </a>
 
           {isLiveSynced && (
-            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/30">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-[#f3a2b5]/20 px-2 py-0.5 text-[10px] font-bold text-[#e9829b] border border-[#f3a2b5]/50">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#e9829b] animate-pulse" />
               <span>Live Firestore Synced</span>
             </span>
           )}
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {viewMode === 'builder' ? (
-            <button
-              onClick={() => handlePreviewLive(currentCard)}
-              className="flex items-center gap-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 transition-colors"
-            >
-              <Eye className="h-4 w-4 text-cyan-400" />
-              <span>Preview</span>
-            </button>
+            <>
+              <button
+                onClick={() => handlePreviewLive(currentCard)}
+                className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-white border border-[#f3a2b5]/50 hover:bg-[#fff9f9] hover:border-[#e9829b] px-2.5 sm:px-3.5 py-1.5 text-xs font-bold text-slate-700 transition-colors shadow-2xs"
+              >
+                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#e9829b]" />
+                <span>Preview</span>
+              </button>
+
+              <button
+                onClick={() => handleSaveAndShare(currentCard)}
+                disabled={isSaving}
+                className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-gradient-to-r from-[#e9829b] via-[#f3a2b5] to-[#e9829b] px-3 sm:px-4 py-1.5 text-xs font-bold text-white transition-opacity shadow-md hover:opacity-95 disabled:opacity-50"
+              >
+                <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save & Share'}</span>
+                <span className="sm:hidden">{isSaving ? '...' : 'Save'}</span>
+              </button>
+            </>
           ) : (
             <button
               onClick={() => setViewMode('builder')}
-              className="flex items-center gap-1.5 rounded-xl bg-pink-600 hover:bg-pink-500 px-3 py-1.5 text-xs font-bold text-white transition-colors shadow"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-gradient-to-r from-[#e9829b] to-[#f3a2b5] hover:opacity-90 px-3 sm:px-3.5 py-1.5 text-xs font-bold text-white transition-all shadow"
             >
-              <PlusCircle className="h-4 w-4" />
+              <PlusCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>Edit / New</span>
             </button>
           )}
 
-          {historyCards.length > 0 && (
-            <button
-              onClick={() => setShowHistoryDrawer(!showHistoryDrawer)}
-              className="flex items-center gap-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-300 transition-colors"
-              title="Recent Cards History"
-            >
-              <History className="h-4 w-4 text-amber-400" />
-              <span className="hidden sm:inline">Saved Cards ({historyCards.length})</span>
-            </button>
-          )}
         </div>
       </header>
 
-      {/* History Cards Slide-Down Panel */}
-      {showHistoryDrawer && (
-        <div className="bg-slate-900 border-b border-slate-800 p-4 animate-fade-in">
-          <div className="mx-auto max-w-xl">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1">
-              <History className="h-3.5 w-3.5 text-amber-400" />
-              <span>Saved Firestore Cloud & Local Cards</span>
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-              {historyCards.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => {
-                    setCurrentCard(c);
-                    setViewMode('presentation');
-                    setShowHistoryDrawer(false);
-                  }}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-pink-500 text-left transition-colors"
-                >
-                  <div>
-                    <span className="block text-xs font-bold text-white truncate">
-                      {c.recipientName ? `Card for ${c.recipientName}` : c.headline}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      Theme: {c.theme} · From {c.senderName || 'Anon'}
-                    </span>
-                  </div>
-                  <span className="text-xs">➡️</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Container Area */}
-      <main className="flex-1">
+      {/* Main Container Area - Responsive 100dvh Fitting */}
+      <main className="flex-1 min-h-0 bg-[#fff9f9] overflow-y-auto flex flex-col">
         {isLoadingCard ? (
-          <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-3">
-            <RefreshCw className="h-8 w-8 text-pink-500 animate-spin" />
-            <p className="text-xs font-bold text-slate-400">Loading Live Card from Firebase...</p>
+          <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+            <RefreshCw className="h-8 w-8 text-[#e9829b] animate-spin" />
+            <p className="text-xs font-bold text-slate-600">Loading Live Card from Firebase...</p>
           </div>
         ) : viewMode === 'builder' ? (
           <CardBuilder
@@ -294,9 +247,9 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 p-4 text-center text-xs text-slate-500">
-        <p>CelebrationCraft · Interactive Birthday Card Studio & Generator · Firebase Firestore Connected</p>
+      {/* Footer - Sleek & Compact to Fit One Window */}
+      <footer className="flex-shrink-0 border-t border-[#f3a2b5]/30 bg-[#fff9f9] py-1.5 px-3 text-center text-[10px] sm:text-[11px] text-slate-500">
+        <p>CelebrationCraft · Interactive Birthday Card Studio · Live Firestore Synced</p>
       </footer>
 
       {/* Export & Share Modal */}
